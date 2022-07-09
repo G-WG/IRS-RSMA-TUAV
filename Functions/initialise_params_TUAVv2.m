@@ -20,7 +20,7 @@ f = 3.5e9; lambda = 3e8/f;
 
 Thether_length = 100; % m
 
-N_R = 2048; % Number of RE.
+% N_R = 128; % Number of RE.
 
 tau = 0.8; % amount of power split between commmon (1-tau)*Pt and private tau*Pt
 % Weighted Sum-Rate Maximization for Rate-Splitting Multiple Access Based 

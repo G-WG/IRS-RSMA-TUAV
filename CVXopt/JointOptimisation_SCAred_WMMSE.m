@@ -1,7 +1,7 @@
-clear all; 
-% name = 'PSred_RSMA_SCA';
-seed_value = 1;
-pp = 0;
+% clear all; 
+% % name = 'PSred_RSMA_SCA';
+% seed_value = 1;
+% pp = 0;
 % fileID = fopen(sprintf('logs/RSMA_comparison_logs/log_seed_%d_%s.txt', seed_value, name),'w');
 % fileID = 1;
 initialise_params_TUAVv2;

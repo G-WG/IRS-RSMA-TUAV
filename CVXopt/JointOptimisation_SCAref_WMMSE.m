@@ -1,6 +1,6 @@
-clear all; 
+% clear all; 
 % name = 'PSred_RSMA_SCA';
-seed_value = 1;
+% seed_value = 1; N_R = 128;
 pp = 0;
 % fileID = fopen(sprintf('logs/RSMA_comparison_logs/log_seed_%d_%s.txt', seed_value, name),'w');
 % fileID = 1;
@@ -12,7 +12,7 @@ Rth = 0*ones(K, 1);
 epsilonRSMA = 1e-6;
 epsilonPS = 1e-4;
 maxIter = 1000;
-
+% totalJointIters = 20;
 RSMAoptCell = {};
 PSoptCell = {};
 
@@ -66,17 +66,27 @@ end
 
 
 %%
-if iter > 1
-    RSMAconvergence =  abs(RSMAoptCell{iter}{1}(end).Rov - RSMAoptCell{iter-1}{1}(end).Rov) <= epsilonRSMA;
-    PSconvergence   =  abs(PSoptCell{iter}{1}(end).Rov - PSoptCell{iter-1}{1}(end).Rov) <= epsilonPS;
-    if RSMAconvergence && PSconvergence
-        loop = 0;
-    end
+try
+    if iter > 1
+        RSMAconvergence =  abs(RSMAoptCell{iter}{1}(end).Rov - RSMAoptCell{iter-1}{1}(end).Rov) <= epsilonRSMA;
+        PSconvergence   =  abs(PSoptCell{iter}{1}(end).Rov - PSoptCell{iter-1}{1}(end).Rov) <= epsilonPS;
+        if RSMAconvergence && PSconvergence
+            loop = 0;
+        end
 
+    end
+catch ME
+    disp(ME)
+    fprintf(fileID, 'CVX non-return.\n');
+    fprintf(fileID, '\n');
+    fprintf(fileID, '##########  END  ##########\n');
+    fprintf(fileID, '\n');
+    fclose(fileID);
+    loop = 0;
 end
 
 
-if iter > 5
+if iter > totalJointIters
     loop = 0;
 end
 
@@ -87,6 +97,9 @@ iter = iter + 1;
 
 %% save workspace and close log
 end
+fprintf(fileID, '\n');
+fprintf(fileID, '##########  END  ##########\n');
+fprintf(fileID, '\n');
 fclose(fileID);
 name_matfile = sprintf('logs/JointOptimisation/log_seed_%d_%s.mat', seed_value, name);
 save(name_matfile)
