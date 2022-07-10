@@ -11,7 +11,7 @@ end
 
 % Based on: A Downlink Coverage Scheme of Tethered UAV (Table 2). 
 
-K = 2; % Number of users
+% K = 2; % Number of users
 N_T = 4; % Number of transmit antennas
 N_UE = 1; % Number of antennas for each user;
 

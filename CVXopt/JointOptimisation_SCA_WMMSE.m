@@ -1,7 +1,7 @@
 % clear all; 
-% name = 'PSred_RSMA_SCA';
-% seed_value = 1; N_R = 128; totalJointIters = 20;
-pp = 0;
+% % name = 'PSred_RSMA_SCA';
+% seed_value = 1;
+% pp = 0; N_R = 128; % totalJointIters = 20;
 % fileID = fopen(sprintf('logs/RSMA_comparison_logs/log_seed_%d_%s.txt', seed_value, name),'w');
 % fileID = 1;
 initialise_params_TUAVv2;
@@ -16,12 +16,12 @@ maxIter = 1000;
 RSMAoptCell = {};
 PSoptCell = {};
 
-name = sprintf('JointOptimisation_PS-SCAref_RSMA-WMMSE_%dRth%d_NR_%d', floor(Rth(1)), round(mod(Rth(1), 1)*10), N_R);
+name = sprintf('JointOptimisation_PS-SCA_RSMA-WMMSE_%dRth%d_NR_%d', floor(Rth(1)), round(mod(Rth(1), 1)*10), N_R);
 fileID = fopen(sprintf('logs/JointOptimisation/log_seed_%d_%s.txt', seed_value, name),'w');
 iter = 1;
-common_rates = min(rate_c).*ones(K, 1)/K;
 loop = 1;
 while loop
+
 
 %% Phase shift
 
@@ -31,7 +31,7 @@ fprintf(fileID, '\n');
 
 try
     [PSoptStructureSCAred, PSloopSCAred, PSiterationsSCAred, PStimeElapsedSCAred] = ...
-            Optimisation_Update_PhaseShiftref(s, h_T_U_PL, h_R_U_PL, G, K, ...
+            Optimisation_Update_PhaseShift(s, h_T_U_PL, h_R_U_PL, G, K, ...
         varianceNoise, p_c_IC, p_k_IC, N_R, Rth, u_k, common_rates, epsilonPS, maxIter, fileID);
     s = PSoptStructureSCAred(PSiterationsSCAred).phaseshifts;
     PSoptCell{iter} = {PSoptStructureSCAred(1:PSiterationsSCAred), PSloopSCAred, PSiterationsSCAred, PStimeElapsedSCAred};
@@ -43,17 +43,18 @@ end
 % if PSoptStructureSCAred(PSiterationsSCAred).PSgt1 > 0
 %     break
 % end
-
 %% RSMA MMSE
 fprintf(fileID, '\n');
 fprintf(fileID, '##########  RSMA  ##########\n');
 fprintf(fileID, '\n');
 Theta = diag(s);
 h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
+% tau = trace(p_k_IC*p_k_IC')/Pt;
 if iter == 1
     p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
     p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
 end
+
 try
     [RSMAoptStructureWMMSE, RSMAloopWMMSE, RSMAiterationsWMMSE, timeElapsedWMMSE] = ...
             Optimisation_Update_RSMAparameters_WMMSE(h_ov_k, K, ...
@@ -101,9 +102,6 @@ iter = iter + 1;
 
 %% save workspace and close log
 end
-fprintf(fileID, '\n');
-fprintf(fileID, '##########  END  ##########\n');
-fprintf(fileID, '\n');
 fclose(fileID);
 name_matfile = sprintf('logs/JointOptimisation/log_seed_%d_%s.mat', seed_value, name);
 save(name_matfile)

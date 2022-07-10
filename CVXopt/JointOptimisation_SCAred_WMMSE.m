@@ -8,7 +8,7 @@ initialise_params_TUAVv2;
 % weights
 u_k = ones(K, 1);
 % Threshold rate
-Rth = 0*ones(K, 1);
+% Rth = 0*ones(K, 1);
 epsilonRSMA = 1e-6;
 epsilonPS = 1e-4;
 maxIter = 1000;
