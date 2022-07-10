@@ -102,6 +102,9 @@ iter = iter + 1;
 
 %% save workspace and close log
 end
+fprintf(fileID, '\n');
+fprintf(fileID, '##########  END  ##########\n');
+fprintf(fileID, '\n');
 fclose(fileID);
 name_matfile = sprintf('logs/JointOptimisation/log_seed_%d_%s.mat', seed_value, name);
 save(name_matfile)
