@@ -16,7 +16,7 @@ maxIter = 1000;
 RSMAoptCell = {};
 PSoptCell = {};
 
-name = sprintf('JointOptimisation_PS-SCAref_RSMA-WMMSE_%dRth%d_NR_%d', floor(Rth(1)), round(mod(Rth(1), 1)*10), N_R);
+name = sprintf('JointOptimisation_RSMA-WMMSE_PS-SCAref_%dRth%d_NR_%d_AMBF_RZF', floor(Rth(1)), round(mod(Rth(1), 1)*10), N_R);
 fileID = fopen(sprintf('logs/JointOptimisation/log_seed_%d_%s.txt', seed_value, name),'w');
 iter = 1;
 common_rates = min(rate_c).*ones(K, 1)/K;

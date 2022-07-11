@@ -39,10 +39,13 @@ elevationAngleRIS = atan((q_TUAV(3) - q_RIS(3))/norm(q_TUAV(1:2)-q_RIS(1:2)));
 
 %% UEs position
 
-x_pos = 5*(rand(K, 1)*2);
-y_pos = 5*(rand(K, 1)*2-1);
-z_pos = 1.5*ones(K, 1);
-q_UEs = [x_pos, y_pos, z_pos]';
+% x_pos = 5*(rand(K, 1)*2);
+% y_pos = 5*(rand(K, 1)*2-1);
+% z_pos = 1.5*ones(K, 1);
+% q_UEs = [x_pos, y_pos, z_pos]';
+q_UEs = [5.0022, 4.6113;
+        -0.7860, 2.7578;
+        1.5, 1.5];
 
 elevationAngleUEs = atan((q_TUAV(3) - q_UEs(3, :))./sqrt(sum((q_TUAV(1:2)-q_UEs(1:2, :)).^2)));
 
@@ -154,10 +157,10 @@ h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
 
 %% Precoder
 
-% p_c = AMBF_common_precoder(h_ov_k, Pt, tau);
-p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
-% p_k = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
-p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
+p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
+% p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
+p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
+% p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
 
 P = [p_c_IC, p_k_IC];
 assert(round(trace(P*P')) == Pt, 'power out of bounds')

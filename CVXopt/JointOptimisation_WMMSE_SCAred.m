@@ -16,9 +16,10 @@ maxIter = 1000;
 RSMAoptCell = {};
 PSoptCell = {};
 
-name = sprintf('JointOptimisation_RSMA-WMMSE_PS-SCAred_%dRth%d_NR_%d', floor(Rth(1)), round(mod(Rth(1), 1)*10), N_R);
+name = sprintf('JointOptimisation_RSMA-WMMSE_PS-SCAred_%dRth%d_NR_%d_AMBF_RZF', floor(Rth(1)), round(mod(Rth(1), 1)*10), N_R);
 fileID = fopen(sprintf('logs/JointOptimisation/log_seed_%d_%s.txt', seed_value, name),'w');
 iter = 1;
+common_rates = min(rate_c).*ones(K, 1)/K;
 loop = 1;
 while loop
 
@@ -30,8 +31,10 @@ Theta = diag(s);
 h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
 % tau = trace(p_k_IC*p_k_IC')/Pt;
 if iter == 1
-    p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
-    p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
+    p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
+    % p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
+    p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
+    % p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
 end
 
 try
