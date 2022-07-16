@@ -8,10 +8,10 @@ Rth_list = [0, 8].*ones(K, 1);
 totalJointIters = 100;
 precoderIC = [1, 2]; % {'AMBF-RZF', 'SVD-MRT'} 
 pp = 0;
-for prec=precoderIC
-    fprintf('precoderIC %d\n', prec);
-    for seed_value = seed_value_list
-        fprintf('seed value %d\n', seed_value);
+for seed_value = seed_value_list
+    fprintf('seed value %d\n', seed_value);
+    for prec=precoderIC
+        fprintf('precoderIC %d\n', prec);
         for N_R = N_R_list
             fprintf('Number of REs %d\n', N_R);
             for Rth = Rth_list
