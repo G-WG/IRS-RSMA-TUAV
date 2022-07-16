@@ -106,6 +106,6 @@ cvx_begin quiet
 cvx_end
 
 opt_val = cvx_optval;
-if opt_val == Inf || isnan(opt_val)
-    disp('inf-nan')
-end
+% if opt_val == Inf || isnan(opt_val)
+%     disp('inf-nan')
+% end

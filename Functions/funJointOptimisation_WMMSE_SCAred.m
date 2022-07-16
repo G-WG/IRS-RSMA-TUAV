@@ -1,4 +1,4 @@
-function funJointOptimisation_WMMSE_SCAred(seed_value, N_R, K, Rth, totalJointIters, pp)
+function funJointOptimisation_WMMSE_SCAred(seed_value, N_R, K, Rth, totalJointIters, pp, precoderIC)
 
 disp('Start: JointOptimisation_WMMSE_SCAred')
 JointOptimisation_WMMSE_SCAred;

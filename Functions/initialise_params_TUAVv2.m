@@ -156,12 +156,13 @@ varianceNoise = varianceNoise * (1e6)^2;
 h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
 
 %% Precoder
-
-p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
-% p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
-p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
-% p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
-
+if precoderIC == 1
+    p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
+    p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
+else
+    p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
+    p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
+end
 P = [p_c_IC, p_k_IC];
 assert(round(trace(P*P')) == Pt, 'power out of bounds')
 
