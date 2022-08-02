@@ -22,7 +22,7 @@ Thether_length = 100; % m
 
 % N_R = 128; % Number of RE.
 
-tau = 0.8; % amount of power split between commmon (1-tau)*Pt and private tau*Pt
+tau = 1; % amount of power split between commmon (1-tau)*Pt and private tau*Pt
 % Weighted Sum-Rate Maximization for Rate-Splitting Multiple Access Based 
 % Secure Communication
 

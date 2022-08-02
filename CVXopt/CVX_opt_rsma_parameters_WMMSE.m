@@ -35,7 +35,7 @@ for k = 1:K
     e_p_IC(k) = precoder_matrix_k_IC(:, k)'*h_ov_k(:, k) / T_k_p(k);
 
     % Weights of the augmented WMSE of the common and private stream,
-    % equation (51).
+    % equation (51) with value of eq. (45) and (46)
     lambda_c_IC(k) = T_k_c(k)/I_k_c(k);
     lambda_p_IC(k) = T_k_p(k)/I_k_p(k);
     

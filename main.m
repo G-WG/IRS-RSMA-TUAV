@@ -22,7 +22,7 @@ for seed_value = seed_value_list
     %             funJointOptimisation_SCAref_WMMSE(seed_value, N_R, K, Rth, totalJointIters, pp)
                 funJointOptimisation_WMMSE_SCAref(seed_value, N_R, K, Rth, totalJointIters, pp, prec)
     %             funJointOptimisation_SCAred_WMMSE(seed_value, N_R, K, Rth, totalJointIters, pp)
-                funJointOptimisation_WMMSE_SCAred(seed_value, N_R, K, Rth, totalJointIters, pp, prec)
+%                 funJointOptimisation_WMMSE_SCAred(seed_value, N_R, K, Rth, totalJointIters, pp, prec)
     %             funJointOptimisation_SCA_WMMSE(seed_value, N_R,    K, Rth, totalJointIters, pp)
             end
         end
