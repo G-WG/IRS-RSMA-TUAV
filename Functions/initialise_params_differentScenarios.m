@@ -1,5 +1,5 @@
 %%
-seed_value = 1; pp = 1; K = 3; N_R = 128; tau = 0.8;
+% seed_value = 5; pp = 1; K = 2; N_R = 128; tau = 0.8; precoderIC = 1;
 rng(seed_value);
 cpt = get(groot,'defaultLineLineWidth');
 if cpt < 1
@@ -32,8 +32,9 @@ widthBuilding = wB-wS;
 
 
 %% TUAV position
-h_B = 30; % m
-q_TUAV = [0, 0, h_B+Thether_length]';
+% h_B = 30; % m
+% q_B = [0, 0, h_B]';
+% q_TUAV = [0-10, 0, 100]' + q_B;
 % cable can be up to 100 m
 
 %% RIS position
@@ -54,10 +55,13 @@ elevationAngleRIS = atan((q_TUAV(3) - q_RIS(3))/norm(q_TUAV(1:2)-q_RIS(1:2)));
 q_UEs = zeros(3, K);
 q_UEs(:, 1) = [q_RIS(1)-3, q_RIS(2)+3, 1.5];
 q_UEs(:, 2) = [q_RIS(1)-wS+2, q_RIS(2)-3, 1.5];
-q_UEs(:, 3) = [q_RIS(1)-wS-widthBuilding-2, q_RIS(2)-3, 1.5];
+% q_UEs(:, 3) = [q_RIS(1)-wS-widthBuilding-2, q_RIS(2)-3, 1.5];
 elevationAngleUEs = atan((q_TUAV(3) - q_UEs(3, :))./sqrt(sum((q_TUAV(1:2)-q_UEs(1:2, :)).^2)));
+q = zeros(2, K); q(1, :) = widthBuilding/2; q(2, :) = q_UEs(2, :);
+elevationAngleUEs2BuildingCenter = atan((h_B - q_UEs(3, :))./sqrt(sum(q-q_UEs(1:2, :)).^2));
 
-
+% elevationAngleUEs2BuildingCenter < elevationAngleUEs
+elevationAngleRIS2BuildingCenter = atan((h_B - q_RIS(3, :))./sqrt(sum(q-q_RIS(1:2, :)).^2));
 
 %%
 deltaTxt = 0.5;
@@ -102,17 +106,38 @@ alphaTUAV2UE = a1*probabilityLOS(highriseUrban, elevationAngleUEs) + b1;
 
 % alphaTUAV2UE = 3.5;
 
-KNLOS_factor_db = -10; % k factor depends on the position of the user
-% a3 = 5; % 5dB
-% b3 = 2/pi * (log(15/a3));
-% KfactorTUAV2UE = a3 * exp(b3 * elevationAngleUEs)
+% KNLOS_factor_db = [-10]; % k factor depends on the position of the user
+a3 = 5; % 5dB
+b3 = 2/pi * (log(15/a3));
+% KNLOS_factor_db = a3 * exp(b3 * elevationAngleUEs);
+
+% Check the LoS of the TUAV to UEs
+if q_TUAV(1, 1) >= q(1, 1)
+    % The x-position of the TUAV is at the left side of the building.
+    % both users are LoS
+%     disp('LOS')
+    KNLOS_factor_db = ones(1, K)*-10;
+    
+%     KNLOS_factor_db = a3 * exp(b3 * elevationAngleUEs);
+else
+    % The elevation angle needs to be checked
+%     disp('Çhecking...')
+%     fprintf('ElAngleUEs %.2f, %.2f\n', elevationAngleUEs(1)*180/pi, elevationAngleUEs(2)*180/pi)
+%     fprintf('ElAnglesUE2Building %.2f, %.2f\n', elevationAngleUEs2BuildingCenter(1)*180/pi, elevationAngleUEs2BuildingCenter(2)*180/pi)
+    idx = elevationAngleUEs <= elevationAngleUEs2BuildingCenter;
+%     KNLOS_factor_db = a3 * exp(b3 * elevationAngleUEs);
+    KNLOS_factor_db = ones(1, K)*-10;
+    KNLOS_factor_db(idx) = -100;
+%     KNLOS_factor_db(idx) = -10;
+end
+
 KNLOS_factor = 10.^(KNLOS_factor_db/10);
 
 h_T_U_LOS_factor = 1; % 
 h_T_U_NLOS_factor = complex(randn(N_T, K),randn(N_T, K))/sqrt(2);
 
-h_T_U_NLOS = (sqrt(KNLOS_factor/(1+KNLOS_factor))*h_T_U_LOS_factor +...
-    sqrt(1/(1+KNLOS_factor))*h_T_U_NLOS_factor);
+h_T_U_NLOS = (sqrt(KNLOS_factor./(1+KNLOS_factor)).*h_T_U_LOS_factor +...
+    sqrt(1./(1+KNLOS_factor)).*h_T_U_NLOS_factor);
 
 h_T_U_PL = h_T_U_NLOS.*sqrt((lambda/4/pi)^2 * d_T_U.^(-alphaTUAV2UE));
 
@@ -203,3 +228,5 @@ assert(round(trace(P*P')) == Pt, 'power out of bounds')
 
 [rate_c, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c_IC, p_k_IC);
 common_rates = min(rate_c)/K*ones(size(rate_c));
+
+wsr = sum(rate_kp + common_rates);
