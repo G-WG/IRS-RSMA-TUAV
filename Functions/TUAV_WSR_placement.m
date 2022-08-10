@@ -8,22 +8,27 @@ maximumTetherLength = 100; % m
 
 
 
-% linearGrid = -100:5:100;
+% linearGrid = 0:0.5:15;
 linearGrid = [-100:10:-10, -8:1:q_RIS(1)];
 [X,Y] = meshgrid(linearGrid);
 altitudeLevels = 0;
-% h_T_U_PL_array = zeros(length(altitudeLevels), K);
+
 h_T_U_PL_array = zeros(length(linearGrid), length(linearGrid), K);
-% h_T_R_PL_array = zeros(length(altitudeLevels), 1);
+
 WSR_TUAV_Zposition = zeros([size(X), length(altitudeLevels)]);
+
 for iz = 1:length(altitudeLevels)
+    
     fprintf('iz: %d out of %d\n', iz, length(altitudeLevels))
     altitudeTUAV = altitudeLevels(iz); % altitude from the rooftop
+    
     Z = ones(size(X));
     Z(sqrt(X.^2 + Y.^2 + altitudeTUAV)>maximumTetherLength) = 0;
+    
     for xIndex = 1:length(linearGrid)
         for yIndex = 1:length(linearGrid)
             if Z(xIndex, yIndex) == 1
+                
                 q_TUAV = [linearGrid(xIndex), linearGrid(xIndex), altitudeTUAV]' + q_B;
                 initialise_params_differentScenarios;
                 h_T_U_PL_array(xIndex, yIndex, :) = sum_square_abs(h_T_U_PL);
