@@ -32,7 +32,7 @@ widthBuilding = wB-wS;
 
 %% RIS position
 
-q_RIS = [widthBuilding/2 + wS, 0, 30]';
+q_RIS = [widthBuilding/2 + wS, 0, 20]';
 
 elevationAngleRIS = atan((q_TUAV(3) - q_RIS(3))/norm(q_TUAV(1:2)-q_RIS(1:2)));
 
@@ -101,21 +101,21 @@ b3 = 2/pi * (log(15/a3));
 if q_TUAV(1, 1) >= q(1, 1)
     % The x-position of the TUAV is at the left side of the building.
     % both users are LoS
-    KNLOS_factor_db = ones(1, K)*-10;
-%     KNLOS_factor_db = a3 * exp(b3 * elevationAngleUEs);
+%     KNLOS_factor_db = ones(1, K)*-10;
+    KNLOS_factor_db = a3 * exp(b3 * elevationAngleUEs);
 else
 %     fprintf('ElAngleUEs %.2f, %.2f\n', elevationAngleUEs(1)*180/pi, elevationAngleUEs(2)*180/pi)
 %     fprintf('ElAnglesUE2Building %.2f, %.2f\n', elevationAngleUEs2BuildingCenter(1)*180/pi, elevationAngleUEs2BuildingCenter(2)*180/pi)
     idx = elevationAngleUEs <= elevationAngleUEs2BuildingCenter;
-%     KNLOS_factor_db = a3 * exp(b3 * elevationAngleUEs);
-    KNLOS_factor_db = ones(1, K)*-10;
+    KNLOS_factor_db = a3 * exp(b3 * elevationAngleUEs);
+%     KNLOS_factor_db = ones(1, K)*-10;
     KNLOS_factor_db(idx) = -100;
 end
 
 KNLOS_factor = 10.^(KNLOS_factor_db/10);
 
 h_T_U_LOS_factor = 1; % 
-h_T_U_NLOS_factor = complex(randn(N_T, K),randn(N_T, K))/sqrt(2);
+h_T_U_NLOS_factor = complex(randn(N_T, K),randn(N_T, K))/sqrt(2)/sqrt(N_T*K);
 
 h_T_U_NLOS = (sqrt(KNLOS_factor./(1+KNLOS_factor)).*h_T_U_LOS_factor +...
     sqrt(1./(1+KNLOS_factor)).*h_T_U_NLOS_factor);
@@ -126,19 +126,24 @@ h_T_U_PL = h_T_U_NLOS.*sqrt((lambda/4/pi)^2 * d_T_U.^(-alphaTUAV2UE));
 
 alpha_T_R = 2;
 
-idx = elevationAngleRIS <= elevationAngleRIS2BuildingCenter;
-% KNLOS_factor_db = a3 * exp(b3 * elevationAngleRIS);
-KNLOS_factor_db = 10;
-% if idx
-%     KNLOS_factor_db = -10;
-% end
-% KLOS_factor_db = 10;
+
+if q_TUAV(1, 1) >= q(1, 1)
+    KLOS_factor_db = a3 * exp(b3 * elevationAngleRIS);
+    % KLOS_factor_db = 10;
+else
+    idx = elevationAngleRIS <= elevationAngleRIS2BuildingCenter;
+    KLOS_factor_db = a3 * exp(b3 * elevationAngleRIS);
+    % KLOS_factor_db = 10;
+    if idx
+        KLOS_factor_db = -100;
+    end
+end
 
 
 KLOS_factor = 10.^(KLOS_factor_db/10);
 
 h_T_R_LOS_factor = 1; 
-h_T_R_NLOS_factor = complex(randn(N_R, N_T),randn(N_R, N_T))/sqrt(2);
+h_T_R_NLOS_factor = complex(randn(N_R, N_T),randn(N_R, N_T))/sqrt(2)/sqrt(N_R*N_T);
 
 h_T_R_LOS = (sqrt(KLOS_factor./(1+KLOS_factor)).*h_T_R_LOS_factor +...
     sqrt(1./(1+KLOS_factor)).*h_T_R_NLOS_factor);
@@ -154,7 +159,7 @@ KLOS_factor_db = 10;
 KLOS_factor = 10.^(KLOS_factor_db/10);
 
 h_R_U_LOS_factor = 1; % 
-h_R_U_NLOS_factor = complex(randn(N_R, N_UE),randn(N_R, N_UE))/sqrt(2);
+h_R_U_NLOS_factor = complex(randn(N_R, N_UE),randn(N_R, N_UE))/sqrt(2)/sqrt(N_R*N_UE);
 
 h_R_U_LOS = (sqrt(KLOS_factor./(1+KLOS_factor)).*h_R_U_LOS_factor +...
                 sqrt(1./(1+KLOS_factor)).*h_R_U_NLOS_factor); 

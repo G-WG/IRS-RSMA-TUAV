@@ -1,4 +1,4 @@
-seed_value = 150; pp = 0; K = 2; N_R = 128; tau = 0.8; precoderIC = 1; 
+seed_value = 100; pp = 0; K = 2; N_R = 128; tau = 0; precoderIC = 2; 
 h_B = 30; % m. It is a 10-storey bulding
 q_B = [0, 0, h_B]';
 q_TUAV = [0, 0, 0]' + q_B;
@@ -11,9 +11,11 @@ maximumTetherLength = 100; % m
 % linearGrid = 0:0.5:15;
 linearGrid = [-100:10:-10, -8:1:q_RIS(1)];
 [X,Y] = meshgrid(linearGrid);
-altitudeLevels = 0;
+altitudeLevels = 0:10:100;
 
 h_T_U_PL_array = zeros(length(linearGrid), length(linearGrid), K);
+h_T_R_PL_array = zeros(length(linearGrid), length(linearGrid), N_T);
+h_ov_array = zeros(length(linearGrid), length(linearGrid), K);
 
 WSR_TUAV_Zposition = zeros([size(X), length(altitudeLevels)]);
 
@@ -31,7 +33,10 @@ for iz = 1:length(altitudeLevels)
                 
                 q_TUAV = [linearGrid(xIndex), linearGrid(xIndex), altitudeTUAV]' + q_B;
                 initialise_params_differentScenarios;
-                h_T_U_PL_array(xIndex, yIndex, :) = sum_square_abs(h_T_U_PL);
+                h_T_U_PL_array(xIndex, yIndex, :) = sum_square_abs(h_T_U_NLOS);
+                h_T_R_PL_array(xIndex, yIndex, :) = sum_square_abs(h_T_R_LOS);
+                h_ov_array(xIndex, yIndex, :) = sum_square_abs(h_ov_k);
+
 %                 h_T_R_PL_array(iz, :) = sum(sum_square_abs(G, 2));
                 if linearGrid(xIndex) < q_RIS(1)
                     WSR_TUAV_Zposition(xIndex, yIndex, iz) = wsr;
@@ -70,7 +75,7 @@ end
 %%
 
 figure; hold on;
-for iz = 1%:length(altitudeLevels)
+for iz = 1:length(altitudeLevels)
     WSR_TUAV_Zposition2  = WSR_TUAV_Zposition(:, :, iz);
     WSR_TUAV_Zposition2(WSR_TUAV_Zposition2 == 0) = NaN;
     plot(X(Y == 0), WSR_TUAV_Zposition2(X == 0), '--x', 'DisplayName', sprintf('TUAV = %d [m]', altitudeLevels(iz)))
@@ -82,8 +87,8 @@ setPlotParams;
 %%
 
 figure;
-zData = h_T_U_PL_array(:, :, 1);  zData(zData == 0) = NaN;
+zData = h_ov_array(:, :, 1);  zData(zData == 0) = NaN;
 surf(Y,X, zData); hold on;
-zData = h_T_U_PL_array(:, :, 2);  zData(zData == 0) = NaN;
-surf(Y,X, zData); 
+% zData = h_T_U_PL_array(:, :, 2);  zData(zData == 0) = NaN;
+% surf(Y,X, zData); 
 % surf(Y,X, h_T_U_PL_array(:, :, 2))
