@@ -111,7 +111,7 @@ else
 %     KNLOS_factor_db = ones(1, K)*-10;
     KNLOS_factor_db(idx) = -100;
 end
-
+% KLOS_factor_db_UE = KNLOS_factor_db;
 KNLOS_factor = 10.^(KNLOS_factor_db/10);
 
 h_T_U_LOS_factor = 1; % 
@@ -128,13 +128,13 @@ alpha_T_R = 2;
 
 
 if q_TUAV(1, 1) >= q(1, 1)
-    KLOS_factor_db = a3 * exp(b3 * elevationAngleRIS);
-    % KLOS_factor_db = 10;
+%     KLOS_factor_db = a3 * exp(b3 * elevationAngleRIS);
+    KLOS_factor_db = 10;
 else
     idx = elevationAngleRIS <= elevationAngleRIS2BuildingCenter;
-    KLOS_factor_db = a3 * exp(b3 * elevationAngleRIS);
-    % KLOS_factor_db = 10;
-    if idx
+%     KLOS_factor_db = a3 * exp(b3 * elevationAngleRIS);
+    KLOS_factor_db = 10;
+    if idx || q_TUAV(1, 1) >= q_RIS(1, 1)
         KLOS_factor_db = -100;
     end
 end
