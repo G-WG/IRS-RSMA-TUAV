@@ -34,7 +34,7 @@ cornerBuildings = [widthBuilding/2, widthBuilding/2; -widthBuilding/2, widthBuil
 
 q_RIS = [widthBuilding/2 + wS, 0, 20]';
 
-elevationAngleRIS = atan((q_TUAV(3) - q_RIS(3))/norm(q_TUAV(1:2)-q_RIS(1:2)));
+RIS2TUAVElevation = atan((q_TUAV(3) - q_RIS(3))/norm(q_TUAV(1:2)-q_RIS(1:2)));
 
 %% UEs position
 
@@ -42,14 +42,11 @@ q_UEs = zeros(3, K);
 q_UEs(:, 1) = [q_RIS(1)-3, q_RIS(2)+3, 1.5];
 q_UEs(:, 2) = [q_RIS(1)-wS+1, q_RIS(2)-1, 1.5];
 % q_UEs(:, 3) = [q_RIS(1)-wS-widthBuilding-2, q_RIS(2)-3, 1.5];
-elevationAngleUEs = atan((q_TUAV(3) - q_UEs(3, :))./sqrt(sum((q_TUAV(1:2)-q_UEs(1:2, :)).^2)));
+UEs2TUAVElevation = atan2((q_TUAV(3) - q_UEs(3, :)), sqrt(sum((q_TUAV(1:2)-q_UEs(1:2, :)).^2)));
 
 q = zeros(2, K); q(1, :) = widthBuilding/2; q(2, :) = q_UEs(2, :);
 elevationAngleUEs2BuildingCenter = atan((h_B - q_UEs(3, :))./sqrt(sum(q-q_UEs(1:2, :)).^2));
 
-% elevationAngleUEs2BuildingCenter < elevationAngleUEs
-q = zeros(2, 1); q(1, :) = widthBuilding/2; q(2, :) = q_RIS(2, :);
-elevationAngleRIS2BuildingCenter = atan((h_B - q_RIS(3, :))./sqrt(sum(q-q_RIS(1:2, :)).^2));
 
 %%
 deltaTxt = 0.5;
@@ -66,24 +63,172 @@ if pp
 
     r = rectangle('Position',[-widthBuilding/2 -widthBuilding/2 widthBuilding widthBuilding]);
     rectangle('Position',[-widthBuilding/2+wB -widthBuilding/2 widthBuilding widthBuilding]);
-    xlim([-15, 30])
+    xlim([-30, 30])
     ylim([-15, 15])
 end
 
 %% Define visibility cones
 
+%% RIS
 thetaRightCorner2RIS = atan((q_RIS(2) - cornerBuildings(1, 1))/(q_RIS(1) - cornerBuildings(1, 2)));
 thetaLeftCorner2RIS = atan((q_RIS(2) - cornerBuildings(2, 1))/(q_RIS(1) - cornerBuildings(2, 2)));
-thetaTUAV2RIS = atan((q_RIS(2) - q_TUAV(2))/(q_RIS(1) - q_TUAV(1)));
-
-if thetaTUAV2RIS < thetaRightCorner2RIS & thetaTUAV2RIS > thetaLeftCorner2RIS
-    disp('TUAV is in the cone')
+thetaTUAV2RIS = atan2((q_RIS(2) - q_TUAV(2)), (q_RIS(1) - q_TUAV(1)));
+idxRIS = 1;
+if thetaTUAV2RIS > thetaRightCorner2RIS && thetaTUAV2RIS < thetaLeftCorner2RIS
+%     disp('TUAV is in the cone')
     % In order to know whether the TUAV and RIS has LoS, elevation angles
     % must be compared
-else
-    disp('LOS TUAV-RIS')
+    RIS2Building = wS / cos(thetaTUAV2RIS);
+    RIS2BuildingElevation = atan((h_B-q_RIS(3))/RIS2Building);
+    idxRIS = RIS2TUAVElevation >= RIS2BuildingElevation;
 end
 
+%% UEs
+
+thetaRightCorner2UEs = atan((q_UEs(2, :) - cornerBuildings(1, 1))./(q_UEs(1, :) - cornerBuildings(1, 2)));
+thetaLeftCorner2UEs  = atan((q_UEs(2, :) - cornerBuildings(2, 1))./(q_UEs(1, :) - cornerBuildings(2, 2)));
+thetaTUAV2UEs        = atan2((q_UEs(2, :)- q_TUAV(2)),(q_UEs(1, :) - q_TUAV(1)));
+
+idxUEsConeBlockage = thetaTUAV2UEs > thetaRightCorner2UEs & thetaTUAV2UEs < thetaLeftCorner2UEs;
+
+UEs2Building =  abs(widthBuilding/2 - q_UEs(1, :))./ cos(thetaTUAV2UEs);
+UEs2BuildingElevation = atan2((h_B-q_UEs(3, :)),UEs2Building);
+idxUEs = ones(1, K);
+idxUEs(idxUEsConeBlockage) = UEs2TUAVElevation(idxUEsConeBlockage) >= UEs2BuildingElevation(idxUEsConeBlockage);
+% if idx == 1, then it is LOS, otherwise, it is blocked
+
+%% distances
+% direct path
+d_T_U = sqrt(sum(q_UEs.^2 + q_TUAV.^2, 1));
+% TUAV - RIS
+d_T_R = sqrt(sum(q_RIS.^2 + q_TUAV.^2, 1));
+% RIS - UE
+d_R_U = sqrt(sum(q_UEs.^2 + q_RIS.^2, 1));
+%%
+% idxUEs
+% idxRIS
+
+
+%% TUAV - UEs channel (direct)
+urban = [9.61, 0.16];
+denseUrban = [12.08, 0.11];
+highriseUrban = [27.23, 0.08];
+probabilityLOS = @(x, elevationAngle) 1./(1 + x(1)*exp(-x(2)*(elevationAngle - x(1))));
+
+a1 = 2-3.5;
+b1 = 3.5;
+
+alphaTUAV2UE = a1*probabilityLOS(highriseUrban, elevationAngleUEs) + b1;
+
+% alphaTUAV2UE = 3.5;
+a3 = 5; % 5dB
+b3 = 2/pi * (log(15/a3));
+KNLOS_factor_db = a3 * exp(b3 * UEs2TUAVElevation);
+if q_TUAV(1, 1) < q(1, 1)
+    KNLOS_factor_db(~idxUEs) = -100;
+end
+
+KNLOS_factor = 10.^(KNLOS_factor_db/10);
+
+h_T_U_LOS_factor = 1; % 
+h_T_U_NLOS_factor = complex(randn(N_T, K),randn(N_T, K))/sqrt(2)/sqrt(N_T*K);
+
+h_T_U_NLOS = (sqrt(KNLOS_factor./(1+KNLOS_factor)).*h_T_U_LOS_factor +...
+    sqrt(1./(1+KNLOS_factor)).*h_T_U_NLOS_factor);
+
+h_T_U_PL = h_T_U_NLOS.*sqrt((lambda/4/pi)^2 * d_T_U.^(-alphaTUAV2UE));
+
+%% TUAV - RIS channel
+
+alpha_T_R = 2;
+
+
+KLOS_factor_db = 10;
+if ~idxRIS
+    KLOS_factor_db = -100;
+end
+KLOS_factor = 10.^(KLOS_factor_db/10);
+
+h_T_R_LOS_factor = 1; 
+h_T_R_NLOS_factor = complex(randn(N_R, N_T),randn(N_R, N_T))/sqrt(2)/sqrt(N_R*N_T);
+
+h_T_R_LOS = (sqrt(KLOS_factor./(1+KLOS_factor)).*h_T_R_LOS_factor +...
+    sqrt(1./(1+KLOS_factor)).*h_T_R_NLOS_factor);
+
+
+G = h_T_R_LOS.*sqrt((lambda/4/pi)^2 * d_T_R.^(-alpha_T_R));
+
+%% RIS - UEs channel
+
+alpha_R_U = 2.8;
+
+KLOS_factor_db = 10;
+KLOS_factor = 10.^(KLOS_factor_db/10);
+
+h_R_U_LOS_factor = 1; % 
+h_R_U_NLOS_factor = complex(randn(N_R, N_UE),randn(N_R, N_UE))/sqrt(2)/sqrt(N_R*N_UE);
+
+h_R_U_LOS = (sqrt(KLOS_factor./(1+KLOS_factor)).*h_R_U_LOS_factor +...
+                sqrt(1./(1+KLOS_factor)).*h_R_U_NLOS_factor); 
+
+h_R_U_PL = h_R_U_LOS.*sqrt((lambda/4/pi)^2 * d_R_U.^(-alpha_R_U));
+
+%% RIS
+% Review Initial condition for phase shifts
+phi = randi([-180, 180], N_R, 1)*pi/180;
+% phi = pi*ones(N_R, 1);
+s = exp(1i*phi);
+Theta = diag(s);
+
+%% Noise Variance
+
+B = 20e6; % 20 MHz of BW; review the parameters for urban area
+NF = 7;
+ThermalNoise = db2pow(-173.9 + NF)/1000;  %W per Hz
+% -173.9 is the noise power at 20 degrees
+% - 204 is the noise power at 0 kelvin degrees
+varianceNoise = ThermalNoise * B;
+
+%% Overall channel
+% amplification of the parameters for numerical resolution purpose.
+h_T_U_PL = h_T_U_PL * 1e6;
+h_R_U_PL = h_R_U_PL * 1e6;
+varianceNoise = varianceNoise * (1e6)^2;
+
+h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
+
+%% Precoder
+if precoderIC == 1
+    if tau ~= 0 && tau ~= 1
+        p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
+        p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
+    elseif tau == 0
+        p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
+        p_k_IC = zeros(N_T, K);
+    else
+        p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
+        p_c_IC = zeros(N_T, 1);
+    end
+else
+    if tau ~= 0 && tau ~= 1
+        p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
+        p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
+    elseif tau == 0
+        p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
+        p_k_IC = zeros(N_T, K);
+    else
+        p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
+        p_c_IC = zeros(N_T, 1);
+    end    
+end
+P = [p_c_IC, p_k_IC];
+assert(round(trace(P*P')) == Pt, 'power out of bounds')
 
 
 
+%%
+
+[rate_c, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c_IC, p_k_IC);
+common_rates = min(rate_c)/K*ones(size(rate_c));
+
+wsr = sum(rate_kp + common_rates);
