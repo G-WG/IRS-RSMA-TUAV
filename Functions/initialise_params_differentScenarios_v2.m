@@ -16,6 +16,7 @@ N_T = 4; % Number of transmit antennas
 N_UE = 1; % Number of antennas for each user;
 
 Pt = 20*N_T; % 20 W per antenna.
+% Pt = db2pow(Pt_dB)/1000;
 f = 3.5e9; lambda = 3e8/f;
 
 Thether_length = 100; % m
@@ -29,7 +30,7 @@ Thether_length = 100; % m
 wB = 20; % distance between building centers
 wS = wB/2; % street width
 widthBuilding = wB-wS;
-cornerBuildings = [widthBuilding/2, widthBuilding/2; -widthBuilding/2, widthBuilding/2];
+cornerBuildings = [widthBuilding/2, widthBuilding/2; -widthBuilding/2, -widthBuilding/2];
 %% RIS position
 
 q_RIS = [widthBuilding/2 + wS, 0, 20]';
@@ -71,7 +72,7 @@ end
 
 %% RIS
 thetaRightCorner2RIS = atan((q_RIS(2) - cornerBuildings(1, 1))/(q_RIS(1) - cornerBuildings(1, 2)));
-thetaLeftCorner2RIS = atan((q_RIS(2) - cornerBuildings(2, 1))/(q_RIS(1) - cornerBuildings(2, 2)));
+thetaLeftCorner2RIS = atan((q_RIS(2) - cornerBuildings(2, 1))/(q_RIS(1) - cornerBuildings(1, 2)));
 thetaTUAV2RIS = atan2((q_RIS(2) - q_TUAV(2)), (q_RIS(1) - q_TUAV(1)));
 idxRIS = 1;
 if thetaTUAV2RIS > thetaRightCorner2RIS && thetaTUAV2RIS < thetaLeftCorner2RIS
@@ -86,7 +87,7 @@ end
 %% UEs
 
 thetaRightCorner2UEs = atan((q_UEs(2, :) - cornerBuildings(1, 1))./(q_UEs(1, :) - cornerBuildings(1, 2)));
-thetaLeftCorner2UEs  = atan((q_UEs(2, :) - cornerBuildings(2, 1))./(q_UEs(1, :) - cornerBuildings(2, 2)));
+thetaLeftCorner2UEs  = atan((q_UEs(2, :) - cornerBuildings(2, 1))./(q_UEs(1, :) - cornerBuildings(1, 2)));
 thetaTUAV2UEs        = atan2((q_UEs(2, :)- q_TUAV(2)),(q_UEs(1, :) - q_TUAV(1)));
 
 idxUEsConeBlockage = thetaTUAV2UEs > thetaRightCorner2UEs & thetaTUAV2UEs < thetaLeftCorner2UEs;
@@ -118,7 +119,7 @@ probabilityLOS = @(x, elevationAngle) 1./(1 + x(1)*exp(-x(2)*(elevationAngle - x
 a1 = 2-3.5;
 b1 = 3.5;
 
-alphaTUAV2UE = a1*probabilityLOS(highriseUrban, elevationAngleUEs) + b1;
+alphaTUAV2UE = a1*probabilityLOS(highriseUrban, UEs2TUAVElevation) + b1;
 
 % alphaTUAV2UE = 3.5;
 a3 = 5; % 5dB
@@ -166,7 +167,7 @@ KLOS_factor_db = 10;
 KLOS_factor = 10.^(KLOS_factor_db/10);
 
 h_R_U_LOS_factor = 1; % 
-h_R_U_NLOS_factor = complex(randn(N_R, N_UE),randn(N_R, N_UE))/sqrt(2)/sqrt(N_R*N_UE);
+h_R_U_NLOS_factor = complex(randn(N_R, K),randn(N_R, K))/sqrt(2)/sqrt(N_R*K);
 
 h_R_U_LOS = (sqrt(KLOS_factor./(1+KLOS_factor)).*h_R_U_LOS_factor +...
                 sqrt(1./(1+KLOS_factor)).*h_R_U_NLOS_factor); 

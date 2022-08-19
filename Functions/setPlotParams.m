@@ -11,11 +11,15 @@ ax.XLabel.Interpreter = "latex";
 ax.XLabel.FontSize = 14;
 ax.YLabel.Interpreter = "latex";
 ax.YLabel.FontSize = 14;
+ax.ZLabel.Interpreter = "latex";
+ax.ZLabel.FontSize = 14;
 ax.Title.Interpreter ="latex";
 ax.Title.FontSize = 18;
-leg.Interpreter = "latex";
-leg.FontSize = 14;
-leg.Location = "best"; 
+if legbool
+    leg.Interpreter = "latex";
+    leg.FontSize = 14;
+    leg.Location = "best"; 
+end
 grid on;
 % axis square;
 

@@ -11,7 +11,7 @@ u_k = ones(K, 1);
 % Rth = 0*ones(K, 1);
 epsilonRSMA = 1e-6;
 epsilonPS = 1e-4;
-maxIter = 20;
+maxIter = 1000;
 
 RSMAoptCell = {};
 PSoptCell = {};

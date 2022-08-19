@@ -15,6 +15,7 @@ end
 N_T = 4; % Number of transmit antennas
 N_UE = 1; % Number of antennas for each user;
 
+% Pt = db2pow(Pt_dB)/1000;
 Pt = 20*N_T; % 20 W per antenna.
 f = 3.5e9; lambda = 3e8/f;
 
@@ -157,7 +158,7 @@ end
 KNLOS_factor = 10.^(KNLOS_factor_db/10);
 
 h_T_U_LOS_factor = 1; % 
-h_T_U_NLOS_factor = complex(randn(N_T, K),randn(N_T, K))/sqrt(2)/sqrt(N_T*K);
+h_T_U_NLOS_factor = complex(randn(N_T, K),randn(N_T, K))/sqrt(2)/sqrt(N_T);
 
 h_T_U_NLOS = (sqrt(KNLOS_factor./(1+KNLOS_factor)).*h_T_U_LOS_factor +...
     sqrt(1./(1+KNLOS_factor)).*h_T_U_NLOS_factor);
@@ -188,11 +189,11 @@ G = h_T_R_LOS.*sqrt((lambda/4/pi)^2 * d_T_R.^(-alpha_T_R));
 
 alpha_R_U = 2.8;
 
-KLOS_factor_db = 10;
+KLOS_factor_db = [10 -100];
 KLOS_factor = 10.^(KLOS_factor_db/10);
 
 h_R_U_LOS_factor = 1; % 
-h_R_U_NLOS_factor = complex(randn(N_R, N_UE),randn(N_R, N_UE))/sqrt(2)/sqrt(N_R*N_UE);
+h_R_U_NLOS_factor = complex(randn(N_R, K),randn(N_R, K))/sqrt(2)/sqrt(N_R);
 
 h_R_U_LOS = (sqrt(KLOS_factor./(1+KLOS_factor)).*h_R_U_LOS_factor +...
                 sqrt(1./(1+KLOS_factor)).*h_R_U_NLOS_factor); 

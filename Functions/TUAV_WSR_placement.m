@@ -1,4 +1,4 @@
-seed_value = 100; pp = 0; K = 2; N_R = 128; tau = 0; precoderIC = 2; 
+seed_value = 150; pp = 0; K = 2; N_R = 128; tau = 0; precoderIC = 1; 
 h_B = 30; % m. It is a 10-storey bulding
 q_B = [0, 0, h_B]';
 q_TUAV = [0, 0, 0]' + q_B;
@@ -11,7 +11,7 @@ maximumTetherLength = 100; % m
 linearGrid = -100:1:100;
 % linearGrid = [-100:10:-20, -18:0.5:18, 20:10:100];
 [X,Y] = meshgrid(linearGrid);
-altitudeLevels = [10];
+altitudeLevels = [0];
 
 h_T_U_PL_array = zeros(length(linearGrid), length(linearGrid), K);
 h_T_R_PL_array = zeros(length(linearGrid), length(linearGrid), N_T);
@@ -31,10 +31,11 @@ for iz = 1:length(altitudeLevels)
         for yIndex = 1:length(linearGrid)
             if Z(xIndex, yIndex) == 1
                 q_TUAV = [linearGrid(xIndex), linearGrid(yIndex), altitudeTUAV]' + q_B;
-%                 if linearGrid(xIndex) == 0 && linearGrid(yIndex) == 0
-%                     disp('00')
+%                 if linearGrid(xIndex) == 6 && linearGrid(yIndex) == 0
+%                     disp('5')
 %                 end
                 initialise_params_differentScenarios_v2;
+%                 initialise_params_differentScenarios2nd_v2;
                 h_T_U_PL_array(xIndex, yIndex, :) = sum_square_abs(h_T_U_NLOS);
                 h_T_R_PL_array(xIndex, yIndex, :) = sum_square_abs(h_T_R_LOS);
                 h_ov_array(xIndex, yIndex, :) = sum_square_abs(h_ov_k);
@@ -47,7 +48,7 @@ for iz = 1:length(altitudeLevels)
     end
 end
 disp('finish')
-
+save('firstScenario.mat')
 %% WSR 3D
 figure;
 hold on;
@@ -58,7 +59,7 @@ for k=1:K
 end
 grid on
 % legend({'TUAV', 'RIS', 'UEs'})
-for iz = 3
+for iz = 1
 
 
 
@@ -88,7 +89,7 @@ setPlotParams;
 %%
 
 figure;
-zData = h_ov_array(:, :, 2);  zData(zData == 0) = NaN;
+zData = h_T_R_PL_array(:, :, 1);  zData(zData == 0) = NaN;
 surf(Y,X, zData); hold on;
 % zData = h_T_U_PL_array(:, :, 2);  zData(zData == 0) = NaN;
 % surf(Y,X, zData); 
