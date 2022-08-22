@@ -3,15 +3,15 @@ h_B = 30; % m. It is a 10-storey bulding
 q_B = [0, 0, h_B]';
 q_TUAV = [0, 0, 0]' + q_B;
 
-initialise_params_differentScenarios;
+initialise_params_differentScenarios2nd_v2;
 maximumTetherLength = 100; % m
 
 
 
-linearGrid = -100:1:100;
+linearGrid = -maximumTetherLength:1:maximumTetherLength;
 % linearGrid = [-100:10:-20, -18:0.5:18, 20:10:100];
 [X,Y] = meshgrid(linearGrid);
-altitudeLevels = [0];
+altitudeLevels = [30];
 
 h_T_U_PL_array = zeros(length(linearGrid), length(linearGrid), K);
 h_T_R_PL_array = zeros(length(linearGrid), length(linearGrid), N_T);
@@ -34,8 +34,8 @@ for iz = 1:length(altitudeLevels)
 %                 if linearGrid(xIndex) == 6 && linearGrid(yIndex) == 0
 %                     disp('5')
 %                 end
-                initialise_params_differentScenarios_v2;
-%                 initialise_params_differentScenarios2nd_v2;
+%                 initialise_params_differentScenarios_v2;
+                initialise_params_differentScenarios2nd_v2;
                 h_T_U_PL_array(xIndex, yIndex, :) = sum_square_abs(h_T_U_NLOS);
                 h_T_R_PL_array(xIndex, yIndex, :) = sum_square_abs(h_T_R_LOS);
                 h_ov_array(xIndex, yIndex, :) = sum_square_abs(h_ov_k);
@@ -48,7 +48,7 @@ for iz = 1:length(altitudeLevels)
     end
 end
 disp('finish')
-save('firstScenario.mat')
+% save('firstScenario.mat')
 %% WSR 3D
 figure;
 hold on;
@@ -63,8 +63,8 @@ for iz = 1
 
 
 
-    r = rectangle('Position',[-widthBuilding/2 -widthBuilding/2 widthBuilding widthBuilding]);
-    rectangle('Position',[-widthBuilding/2+wB -widthBuilding/2 widthBuilding widthBuilding]);
+    rectangle('Position',[-widthBuilding/2 -widthBuilding/2-stretchingFactor widthBuilding widthBuilding+stretchingFactor*2]);
+    rectangle('Position',[-widthBuilding/2+wB -widthBuilding/2-stretchingFactor widthBuilding widthBuilding+stretchingFactor*2]);
     % surfc(X(WSR_TUAV_Zposition > 0), Y(WSR_TUAV_Zposition > 0), WSR_TUAV_Zposition(WSR_TUAV_Zposition > 0), '.')
     WSR_TUAV_Zposition2  = WSR_TUAV_Zposition(:, :, iz);
     WSR_TUAV_Zposition2(WSR_TUAV_Zposition2 == 0) = NaN;

@@ -1,10 +1,10 @@
 %%
 % seed_value = 5; pp = 1; K = 2; N_R = 128; tau = 0.8; precoderIC = 1;
 rng(seed_value);
-cpt = get(groot,'defaultLineLineWidth');
-if cpt < 1
-    set(groot,'defaultLineLineWidth',1.0)
-end
+% cpt = get(groot,'defaultLineLineWidth');
+% if cpt < 1
+%     set(groot,'defaultLineLineWidth',1.0)
+% end
 
 % disp('########')
 %%

@@ -90,8 +90,8 @@ o2 = plot3(q_UEs(1, :), q_UEs(2, :), q_UEs(3, :)*0,'ko');
 % grid on
 leg = legend([o1, o2], {'RIS', 'UEs'});
 iz = 1;
-r = rectangle('Position',[-widthBuilding/2 -widthBuilding/2 widthBuilding widthBuilding]);
-rectangle('Position',[-widthBuilding/2+wB -widthBuilding/2 widthBuilding widthBuilding]);
+rectangle('Position',[-widthBuilding/2 -widthBuilding/2-stretchingFactor widthBuilding widthBuilding+stretchingFactor*2]);
+rectangle('Position',[-widthBuilding/2+wB -widthBuilding/2-stretchingFactor widthBuilding widthBuilding+stretchingFactor*2]);
 % surfc(X(WSR_TUAV_Zposition > 0), Y(WSR_TUAV_Zposition > 0), WSR_TUAV_Zposition(WSR_TUAV_Zposition > 0), '.')
 
 WSR_TUAV_Zposition2  = WSR_TUAV_Zposition(1:d:end, 1:d:end, iz);
@@ -101,8 +101,8 @@ colorbar;
 
 text(q_RIS(1), 0, max(WSR_TUAV_Zposition2(:)), sprintf('TUAV = %d [m]', altitudeLevels(iz)+h_B))
 
-xlim([-50, 30])
-ylim([-50, 50])
+% xlim([-50, 30])
+% ylim([-50, 50])
 
 xlabel('[m]')
 ylabel('[m]')

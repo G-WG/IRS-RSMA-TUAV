@@ -1,10 +1,10 @@
 %%
 % seed_value = 5; pp = 1; K = 2; N_R = 128; tau = 0.8; precoderIC = 1;
 rng(seed_value);
-cpt = get(groot,'defaultLineLineWidth');
-if cpt < 1
-    set(groot,'defaultLineLineWidth',1.0)
-end
+% cpt = get(groot,'defaultLineLineWidth');
+% if cpt < 1
+%     set(groot,'defaultLineLineWidth',1.0)
+% end
 
 % disp('########')
 %%
@@ -27,10 +27,11 @@ Thether_length = 100; % m
 % Weighted Sum-Rate Maximization for Rate-Splitting Multiple Access Based 
 % Secure Communication
 
+stretchingFactor = 5;
 wB = 20; % distance between building centers
 wS = wB/2; % street width
 widthBuilding = wB-wS;
-cornerBuildings = [widthBuilding/2, widthBuilding/2; -widthBuilding/2, -widthBuilding/2];
+cornerBuildings = [widthBuilding/2+stretchingFactor, widthBuilding/2; -widthBuilding/2-stretchingFactor, -widthBuilding/2];
 %% RIS position
 
 q_RIS = [widthBuilding/2 + wS, 0, 20]';
@@ -40,7 +41,7 @@ RIS2TUAVElevation = atan((q_TUAV(3) - q_RIS(3))/norm(q_TUAV(1:2)-q_RIS(1:2)));
 %% UEs position
 
 q_UEs = zeros(3, K);
-q_UEs(:, 1) = [q_RIS(1)-3, q_RIS(2)+3, 1.5];
+q_UEs(:, 1) = [wS/2+1, q_RIS(2)+1, 1.5];
 q_UEs(:, 2) = [-wS/2-1, q_RIS(2)-1, 1.5];
 % q_UEs(:, 3) = [q_RIS(1)-wS-widthBuilding-2, q_RIS(2)-3, 1.5];
 UEs2TUAVElevation = atan2((q_TUAV(3) - q_UEs(3, :)), sqrt(sum((q_TUAV(1:2)-q_UEs(1:2, :)).^2)));
@@ -51,6 +52,7 @@ elevationAngleUEs2BuildingCenter = atan((h_B - q_UEs(3, :))./sqrt(sum(q-q_UEs(1:
 
 %%
 deltaTxt = 0.5;
+
 if pp
     figure;
     plot3(q_TUAV(1), q_TUAV(2), q_TUAV(3), '*'); hold on;
@@ -62,10 +64,21 @@ if pp
     grid on
     legend({'TUAV', 'RIS', 'UEs'})
 
-    r = rectangle('Position',[-widthBuilding/2 -widthBuilding/2 widthBuilding widthBuilding]);
-    rectangle('Position',[-widthBuilding/2+wB -widthBuilding/2 widthBuilding widthBuilding]);
-    xlim([-30, 30])
-    ylim([-15, 15])
+    rectangle('Position',[-widthBuilding/2 -widthBuilding/2-stretchingFactor widthBuilding widthBuilding+stretchingFactor*2]);
+    rectangle('Position',[-widthBuilding/2+wB -widthBuilding/2-stretchingFactor widthBuilding widthBuilding+stretchingFactor*2]);
+%     xlim([-30, 30])
+%     ylim([-15, 15])
+
+%     rectangle('Position',[-widthBuilding/2 ...
+%         -widthBuilding/2-stretchingFactor-2*(widthBuilding+stretchingFactor) ...
+%         widthBuilding widthBuilding+stretchingFactor*2]);
+%     rectangle('Position',[-widthBuilding/2 ...
+%         -widthBuilding/2-stretchingFactor-4*(widthBuilding+stretchingFactor) ...
+%         widthBuilding widthBuilding+stretchingFactor*2]);
+% 
+%     rectangle('Position',[-widthBuilding/2 ...
+%         -widthBuilding/2-stretchingFactor-6*(widthBuilding+stretchingFactor) ...
+%         widthBuilding widthBuilding+stretchingFactor*2]);
 end
 
 %% Define visibility cones
@@ -158,7 +171,7 @@ end
 KNLOS_factor = 10.^(KNLOS_factor_db/10);
 
 h_T_U_LOS_factor = 1; % 
-h_T_U_NLOS_factor = complex(randn(N_T, K),randn(N_T, K))/sqrt(2)/sqrt(N_T);
+h_T_U_NLOS_factor = complex(randn(N_T, K),randn(N_T, K))/sqrt(2)/sqrt(N_T*K);
 
 h_T_U_NLOS = (sqrt(KNLOS_factor./(1+KNLOS_factor)).*h_T_U_LOS_factor +...
     sqrt(1./(1+KNLOS_factor)).*h_T_U_NLOS_factor);
@@ -193,7 +206,7 @@ KLOS_factor_db = [10 -100];
 KLOS_factor = 10.^(KLOS_factor_db/10);
 
 h_R_U_LOS_factor = 1; % 
-h_R_U_NLOS_factor = complex(randn(N_R, K),randn(N_R, K))/sqrt(2)/sqrt(N_R);
+h_R_U_NLOS_factor = complex(randn(N_R, K),randn(N_R, K))/sqrt(2)/sqrt(N_R*K);
 
 h_R_U_LOS = (sqrt(KLOS_factor./(1+KLOS_factor)).*h_R_U_LOS_factor +...
                 sqrt(1./(1+KLOS_factor)).*h_R_U_NLOS_factor); 
