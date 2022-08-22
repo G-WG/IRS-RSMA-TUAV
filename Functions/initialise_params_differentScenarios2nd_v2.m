@@ -79,6 +79,19 @@ if pp
 %     rectangle('Position',[-widthBuilding/2 ...
 %         -widthBuilding/2-stretchingFactor-6*(widthBuilding+stretchingFactor) ...
 %         widthBuilding widthBuilding+stretchingFactor*2]);
+    for xi = -10:2:10
+        for yi = -10:2:10
+            rectangle('Position',[-widthBuilding/2-xi*widthBuilding ...
+                -widthBuilding/2-stretchingFactor-yi*(widthBuilding+stretchingFactor) ...
+                widthBuilding widthBuilding+stretchingFactor*2]);
+%             rectangle('Position',[-widthBuilding/2+wB ...
+%                 -widthBuilding/2-stretchingFactor-yi*(widthBuilding+stretchingFactor) ...
+%                 widthBuilding widthBuilding+stretchingFactor*2]);
+    
+        end
+    end
+    xlim([-100, 100])
+    ylim([-100, 100])
 end
 
 %% Define visibility cones
