@@ -27,7 +27,7 @@ Thether_length = 100; % m
 % Weighted Sum-Rate Maximization for Rate-Splitting Multiple Access Based 
 % Secure Communication
 
-stretchingFactor = 5;
+stretchingFactor = 0;
 wB = 20; % distance between building centers
 wS = wB/2; % street width
 widthBuilding = wB-wS;
@@ -66,32 +66,9 @@ if pp
 
     rectangle('Position',[-widthBuilding/2 -widthBuilding/2-stretchingFactor widthBuilding widthBuilding+stretchingFactor*2]);
     rectangle('Position',[-widthBuilding/2+wB -widthBuilding/2-stretchingFactor widthBuilding widthBuilding+stretchingFactor*2]);
-%     xlim([-30, 30])
-%     ylim([-15, 15])
+    xlim([-30, 30])
+    ylim([-15, 15])
 
-%     rectangle('Position',[-widthBuilding/2 ...
-%         -widthBuilding/2-stretchingFactor-2*(widthBuilding+stretchingFactor) ...
-%         widthBuilding widthBuilding+stretchingFactor*2]);
-%     rectangle('Position',[-widthBuilding/2 ...
-%         -widthBuilding/2-stretchingFactor-4*(widthBuilding+stretchingFactor) ...
-%         widthBuilding widthBuilding+stretchingFactor*2]);
-% 
-%     rectangle('Position',[-widthBuilding/2 ...
-%         -widthBuilding/2-stretchingFactor-6*(widthBuilding+stretchingFactor) ...
-%         widthBuilding widthBuilding+stretchingFactor*2]);
-    for xi = -10:2:10
-        for yi = -10:2:10
-            rectangle('Position',[-widthBuilding/2-xi*widthBuilding ...
-                -widthBuilding/2-stretchingFactor-yi*(widthBuilding+stretchingFactor) ...
-                widthBuilding widthBuilding+stretchingFactor*2]);
-%             rectangle('Position',[-widthBuilding/2+wB ...
-%                 -widthBuilding/2-stretchingFactor-yi*(widthBuilding+stretchingFactor) ...
-%                 widthBuilding widthBuilding+stretchingFactor*2]);
-    
-        end
-    end
-    xlim([-100, 100])
-    ylim([-100, 100])
 end
 
 %% Define visibility cones
