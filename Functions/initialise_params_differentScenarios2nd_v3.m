@@ -82,20 +82,27 @@ if pp
 
 %     rectangle('Position',[-widthBuilding/2 -widthBuilding/2-stretchingFactor widthBuilding widthBuilding+stretchingFactor*2]);
 %     rectangle('Position',[-widthBuilding/2+wB -widthBuilding/2-stretchingFactor widthBuilding widthBuilding+stretchingFactor*2]);
-
+    cpt = 1;
     for xi = [-2, xiList]
         for yi = yiList
             rectangle('Position',[-widthBuilding/2-xi*widthBuilding ...
                 -widthBuilding/2-stretchingFactor-yi*(widthBuilding+stretchingFactor) ...
                 widthBuilding widthBuilding+stretchingFactor*2]);
+            xc = -widthBuilding/2-xi*widthBuilding;
+            yc = -widthBuilding/2-stretchingFactor-yi*(widthBuilding+stretchingFactor);
+            if xi > -2
+                text(xc+deltaTxt,yc+deltaTxt,sprintf('%d', cpt))
+                cpt = cpt+1;
+            end
         end
     end
     xlim([-100, 100])
     ylim([-100, 100])
+    legbool=1;setPlotParams;
     axis square
 end
 
-%%
+%% RIS LoS check
 
 idxRIS = ones(length(S), 1);
 
@@ -140,7 +147,7 @@ for ii = 1:length(S)
         %     disp('TUAV is in the cone')
             % In order to know whether the TUAV and RIS has LoS, elevation angles
             % must be compared
-            RIS2Building = wS / cos(thetaTUAV2RIS);
+            RIS2Building = (q_RIS(1) - S(ii).cornerBuildings(1, 2))  / cos(thetaTUAV2RIS);
             RIS2BuildingElevation = atan((S(ii).height-q_RIS(3))/RIS2Building);
             idxRIS(ii) = RIS2TUAVElevation >= RIS2BuildingElevation;
         end
@@ -149,3 +156,112 @@ for ii = 1:length(S)
 end
 
 isRISLOS = all(boolean(idxRIS));
+
+
+%% UE1 LoS check
+
+idxUE1 = ones(length(S), 1);
+
+for ii = 1:length(S)
+%     if q_TUAV(1) > wS/2
+    if q_TUAV(2) < -wB 
+        % The cone is built by the left upper corner and right lower corner of
+        % the buildings
+        if S(ii).cornerBuildings(1, 1) <= -wB
+            thetaRightCorner2UE1    = atan((q_UEs(2, 1) - S(ii).cornerBuildings(1, 1))/(q_UEs(1, 1) - S(ii).cornerBuildings(2, 2))); % y / x
+            thetaLeftCorner2UE1     = atan((q_UEs(2, 1) - S(ii).cornerBuildings(2, 1))/(q_UEs(1, 1) - S(ii).cornerBuildings(1, 2)));
+            thetaTUAV2UE1           = atan2((q_UEs(2, 1) - q_TUAV(2)), (q_UEs(1, 1) - q_TUAV(1)));
+            if thetaTUAV2UE1 > thetaRightCorner2UE1 & thetaTUAV2UE1 < thetaLeftCorner2UE1
+            %     disp('TUAV is in the cone')
+                UE12Building = (q_UEs(1, 1) - S(ii).cornerBuildings(1, 2)) / cos(thetaTUAV2UE1);
+                UE12BuildingElevation = atan((S(ii).height-q_UEs(3, 1))/UE12Building);
+                idxUE1(ii) = UEs2TUAVElevation(1) >= UE12BuildingElevation;
+            end
+        end
+    
+    elseif q_TUAV(2) > wB
+        if S(ii).cornerBuildings(1, 1) >= wB 
+            thetaRightCorner2UE1    = atan((q_UEs(2, 1) - S(ii).cornerBuildings(1, 1))/(q_UEs(1, 1) - S(ii).cornerBuildings(1, 2))); % y / x
+            thetaLeftCorner2UE1     = atan((q_UEs(2, 1) - S(ii).cornerBuildings(2, 1))/(q_UEs(1, 1) - S(ii).cornerBuildings(2, 2)));
+            thetaTUAV2UE1           = atan2((q_UEs(2, 1) - q_TUAV(2)), (q_UEs(1, 1) - q_TUAV(1)));
+            if thetaTUAV2UE1 > thetaRightCorner2UE1 & thetaTUAV2UE1 < thetaLeftCorner2UE1
+            %     disp('TUAV is in the cone')
+                % In order to know whether the TUAV and RIS has LoS, elevation angles
+                % must be compared
+                UE12Building = (q_UEs(1, 1) - S(ii).cornerBuildings(1, 2)) / cos(thetaTUAV2UE1);
+                UE12BuildingElevation = atan((S(ii).height-q_UEs(3, 1))/UE12Building);
+                idxUE1(ii) = UEs2TUAVElevation(1) >= UE12BuildingElevation;
+            end
+        end
+    
+    else
+        thetaRightCorner2UE1 = atan((q_UEs(2, 1) - S(ii).cornerBuildings(1, 1))/(q_UEs(1, 1) - S(ii).cornerBuildings(1, 2)));
+        thetaLeftCorner2UE1 = atan((q_UEs(2, 1) - S(ii).cornerBuildings(2, 1))/(q_UEs(1, 1) - S(ii).cornerBuildings(1, 2)));
+        thetaTUAV2UE1 = atan2((q_UEs(2, 1) - q_TUAV(2)), (q_UEs(1, 1) - q_TUAV(1)));
+        if thetaTUAV2UE1 > thetaRightCorner2UE1 & thetaTUAV2UE1 < thetaLeftCorner2UE1
+        %     disp('TUAV is in the cone')
+            % In order to know whether the TUAV and RIS has LoS, elevation angles
+            % must be compared
+            UE12Building = (q_UEs(1, 1) - S(ii).cornerBuildings(1, 2)) / cos(thetaTUAV2UE1);
+            UE12BuildingElevation = atan((S(ii).height-q_UEs(3, 1))/UE12Building);
+            idxUE1(ii) = UEs2TUAVElevation(1) >= UE12BuildingElevation;
+        end
+    
+    end
+end
+
+isUE1LOS = all(boolean(idxUE1));
+
+%% UE2 LoS check -- Still incomplete when q_TUAV(1) > q_UEs(1, 2)
+
+idxUE2 = ones(length(S), 1);
+
+for ii = 1:length(S)
+%     if q_TUAV(1) > wS/2
+    if q_TUAV(2) < -wB 
+        % The cone is built by the left upper corner and right lower corner of
+        % the buildings
+        if S(ii).cornerBuildings(1, 1) <= -wB
+            thetaRightCorner2UE2    = atan((q_UEs(2, 2) - S(ii).cornerBuildings(1, 1))/(q_UEs(1, 2) - S(ii).cornerBuildings(2, 2))); % y / x
+            thetaLeftCorner2UE2    = atan((q_UEs(2, 2) - S(ii).cornerBuildings(2, 1))/(q_UEs(1, 2) - S(ii).cornerBuildings(1, 2)));
+            thetaTUAV2UE2           = atan2((q_UEs(2, 2) - q_TUAV(2)), (q_UEs(1, 2) - q_TUAV(1)));
+            if thetaTUAV2UE2 > thetaRightCorner2UE2 & thetaTUAV2UE2 < thetaLeftCorner2UE2
+            %     disp('TUAV is in the cone')
+                UE22Building = (q_UEs(1, 2) - S(ii).cornerBuildings(1, 2)) / cos(thetaTUAV2UE2);
+                UE22BuildingElevation = atan((S(ii).height-q_UEs(3, 2))/UE22Building);
+                idxUE2(ii) = UEs2TUAVElevation(2) >= UE22BuildingElevation;
+            end
+        end
+    
+    elseif q_TUAV(2) > wB
+        if S(ii).cornerBuildings(1, 1) >= wB 
+            thetaRightCorner2UE2    = atan((q_UEs(2, 2) - S(ii).cornerBuildings(1, 1))/(q_UEs(1, 2) - S(ii).cornerBuildings(1, 2))); % y / x
+            thetaLeftCorner2UE2     = atan((q_UEs(2, 2) - S(ii).cornerBuildings(2, 1))/(q_UEs(1, 2) - S(ii).cornerBuildings(2, 2)));
+            thetaTUAV2UE2           = atan2((q_UEs(2, 2) - q_TUAV(2)), (q_UEs(1, 2) - q_TUAV(1)));
+            if thetaTUAV2UE2 > thetaRightCorner2UE2 & thetaTUAV2UE2 < thetaLeftCorner2UE2
+            %     disp('TUAV is in the cone')
+                % In order to know whether the TUAV and RIS has LoS, elevation angles
+                % must be compared
+                UE22Building = (q_UEs(1, 2) - S(ii).cornerBuildings(1, 2)) / cos(thetaTUAV2UE2);
+                UE22BuildingElevation = atan((S(ii).height-q_UEs(3, 2))/UE22Building);
+                idxUE2(ii) = UEs2TUAVElevation(2) >= UE22BuildingElevation;
+            end
+        end
+    
+    else
+        thetaRightCorner2UE2 = atan((q_UEs(2, 2) - S(ii).cornerBuildings(1, 1))/(q_UEs(1, 2) - S(ii).cornerBuildings(1, 2)));
+        thetaLeftCorner2UE2 = atan((q_UEs(2, 2) - S(ii).cornerBuildings(2, 1))/(q_UEs(1, 2) - S(ii).cornerBuildings(1, 2)));
+        thetaTUAV2UE2 = atan2((q_UEs(2, 2) - q_TUAV(2)), (q_UEs(1, 2) - q_TUAV(1)));
+        if thetaTUAV2UE2 > thetaRightCorner2UE2 & thetaTUAV2UE2 < thetaLeftCorner2UE2
+        %     disp('TUAV is in the cone')
+            % In order to know whether the TUAV and RIS has LoS, elevation angles
+            % must be compared
+            UE22Building = (q_UEs(1, 2) - S(ii).cornerBuildings(1, 2)) / cos(thetaTUAV2UE2);
+                UE22BuildingElevation = atan((S(ii).height-q_UEs(3, 2))/UE22Building);
+                idxUE2(ii) = UEs2TUAVElevation(2) >= UE22BuildingElevation;
+        end
+    
+    end
+end
+
+isUE2LOS = all(boolean(idxUE2));
