@@ -1,5 +1,5 @@
 % N_R = 128;
-N_R_list = [128, 512, 2048];
+N_R_list = [128, 256, 512, 1024, 2048];
 % seed_value = 1;
 seed_value_list = [150];
 K = 2;

@@ -79,7 +79,7 @@ axis square;
 
 %% WSR 3D
 
-d = 1;
+d = 3;
 figure;
 hold on;
 o1 = plot3(q_RIS(1), q_RIS(2), q_RIS(3)*0, 'rs');
@@ -89,23 +89,34 @@ o2 = plot3(q_UEs(1, :), q_UEs(2, :), q_UEs(3, :)*0,'ko');
 % end
 % grid on
 leg = legend([o1, o2], {'RIS', 'UEs'});
-iz = 1;
-rectangle('Position',[-widthBuilding/2 -widthBuilding/2-stretchingFactor widthBuilding widthBuilding+stretchingFactor*2]);
-rectangle('Position',[-widthBuilding/2+wB -widthBuilding/2-stretchingFactor widthBuilding widthBuilding+stretchingFactor*2]);
-% surfc(X(WSR_TUAV_Zposition > 0), Y(WSR_TUAV_Zposition > 0), WSR_TUAV_Zposition(WSR_TUAV_Zposition > 0), '.')
 
+iz = 1;
 WSR_TUAV_Zposition2  = WSR_TUAV_Zposition(1:d:end, 1:d:end, iz);
 WSR_TUAV_Zposition2(WSR_TUAV_Zposition2 == 0) = NaN;
-surf(Y(1:d:end, 1:d:end), X(1:d:end, 1:d:end), WSR_TUAV_Zposition2*B/1e6, 'FaceAlpha',0.7);%, 'DisplayName', sprintf('TUAV = %d [m]', altitudeLevels(iz)+h_B))
+surf(Y(1:d:end, 1:d:end), X(1:d:end, 1:d:end), WSR_TUAV_Zposition2*B/1e6, 'FaceAlpha',0.5);%, 'DisplayName', sprintf('TUAV = %d [m]', altitudeLevels(iz)+h_B))
 colorbar;
 
 text(q_RIS(1), 0, max(WSR_TUAV_Zposition2(:)), sprintf('TUAV = %d [m]', altitudeLevels(iz)+h_B))
 
-% xlim([-50, 30])
-% ylim([-50, 50])
+for xi = [-2, xiList]
+    for yi = yiList
+        rectangle('Position',[-widthBuilding/2-xi*widthBuilding ...
+            -widthBuilding/2-stretchingFactor-yi*(widthBuilding+stretchingFactor) ...
+            widthBuilding widthBuilding+stretchingFactor*2]);
+        xc = -widthBuilding/2-xi*widthBuilding;
+        yc = -widthBuilding/2-stretchingFactor-yi*(widthBuilding+stretchingFactor);
+%         if xi > -2
+%             text(xc+deltaTxt,yc+deltaTxt,sprintf('%d', cpt))
+%             cpt = cpt+1;
+%         end
+    end
+end
+xlim([-100, 100])
+ylim([-100, 100])
 
 xlabel('[m]')
 ylabel('[m]')
 zlabel('WSR [Mbps]')
 legbool = 1;
 setPlotParams;
+axis square;
