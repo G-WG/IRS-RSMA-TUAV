@@ -1,12 +1,12 @@
-seed_value = 150; pp = 0; K = 2; N_R = 4096; tau = 0.8; precoderIC = 1; 
+seed_value = 150; pp = 1; K = 2; N_R = 4096; tau = 0.8; precoderIC = 1; 
 h_B = 30; % m. It is a 10-storey bulding
 q_B = [0, 0, h_B]';
-q_TUAV = [0, 0, 0]' + q_B;
+q_TUAV = [0, 0, 100]' + q_B;
 
-initialise_params_differentScenarios2nd_v3;
+initialise_params_differentScenarios2nd_v4;
 maximumTetherLength = 100; % m
 
-
+%%
 
 linearGrid = -maximumTetherLength:1:maximumTetherLength;
 % linearGrid = [-100:10:-20, -18:0.5:18, 20:10:100];

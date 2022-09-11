@@ -18,7 +18,7 @@ ax.Title.FontSize = 18;
 if legbool
     leg.Interpreter = "latex";
     leg.FontSize = 14;
-    leg.Location = "best"; 
+%     leg.Location = "southwest"; 
 end
 grid on;
 % axis square;
