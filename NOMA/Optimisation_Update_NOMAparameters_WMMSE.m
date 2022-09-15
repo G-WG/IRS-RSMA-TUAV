@@ -1,12 +1,14 @@
 function [optStructure, loop, jj, timeElapsed] = ...
-        Optimisation_Update_RSMAparameters_WMMSE(h_ov_k, K, ...
-        varianceNoise, p_c_IC, p_k_IC, Pt, N_T, Rth, u_k, common_rates, epsilon, maxIter, fileID)
+        Optimisation_Update_NOMAparameters_WMMSE(h_ov_k, K, ...
+        varianceNoise, p_c_IC, p_k_IC, Pt, N_T, Rth, u_k, common_rates, epsilon, ...
+        maxIter, fileID, UE_NOMA_common, UE_NOMA_private)
+
 
 % [optStructure, loop, jj] = ...
-%         Optimisation_Update_RSMAparameters_MMSE(h_ov_k, K, ...
+%         Optimisation_Update_NOMAparameters_MMSE(h_ov_k, K, ...
 %         varianceNoise, p_c_IC, p_k_IC, Pt, N_T, Rth, u_k, epsilon, maxIter, fileID)
 %
-% This functions performs iterations over the RSMA parameters optimisation 
+% This functions performs iterations over the NOMA parameters optimisation 
 % using SCA.
 % 
 % Input parameters:
@@ -47,15 +49,17 @@ function [optStructure, loop, jj, timeElapsed] = ...
 % epsilonPS = 1e-4;
 % maxIter = 1000;
 % - [optStructure, loop, jj] = ...
-%         Optimisation_Update_RSMAparameters_SCA(h_ov_k, K, ...
+%         Optimisation_Update_NOMAparameters_SCA(h_ov_k, K, ...
 %         varianceNoise, p_c_IC, p_k_IC, Pt, N_T, Rth, u_k, epsilon, maxIter, fileID)
 %
 % Nested Functions:
 % - compute_rates.m
-% - CVX_opt_rsma_parameters_WMMSE.m
+% - CVX_opt_NOMA_parameters_WMMSE.m
 %
 % Author: Maximiliano Rivera --  marivera3@uc.cl
 % Version: v1.0 2022/06/30
+%   - v2.0: NOMA, with limited maxIter to 10.
+%   - v2.1: Corrected allocation of variables and output jj
 
 %% Structure
 optStructure_.iter = 0;
@@ -86,7 +90,7 @@ if fileID
     fprintf(fileID, '||Pc|| %.8f, ||Pk|| %.8f\n',trace(p_c_IC*p_c_IC'), trace(p_k_IC*p_k_IC'));
 end
 
-% common_rates = min(rate_c)/K;
+
 optStructure(1).Rp = rate_kp;
 optStructure(1).Rc = rate_c;
 optStructure(1).Cc = common_rates;
@@ -95,7 +99,7 @@ optStructure(1).P = [trace(p_c_IC*p_c_IC'), trace(p_k_IC*p_k_IC')]';
 optStructure(1).Pc = p_c_IC;
 optStructure(1).Pk = p_k_IC;
 
-%% CVX RSMA param
+%% CVX NOMA param
 
 
 jj = 1;
@@ -103,14 +107,14 @@ tic;
 while loop
 
     [opt_val, p_k, p_c, common_rates] = ...
-        CVX_opt_rsma_parameters_WMMSE(p_k_IC, p_c_IC,...
-        K, N_T, u_k, Rth, Pt, h_ov_k, varianceNoise);
+        CVX_opt_NOMA_parameters_WMMSE(p_k_IC, p_c_IC,...
+        K, N_T, u_k, Rth, Pt, h_ov_k, varianceNoise, UE_NOMA_common, UE_NOMA_private);
     
 
     p_k_IC = p_k;
     p_c_IC = p_c;
     [rate_c, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c, p_k);
-    
+
     if fileID
         fprintf(fileID, 'opt value: %.8f at %3d, ', opt_val, jj);
         for ii = 1:K
@@ -140,11 +144,9 @@ while loop
     if abs(optStructure(jj+1).optimalValue - optStructure(jj).optimalValue ) < epsilon
         loop = 0;
     end
-    
-    if any(~(rate_c > sum(common_rates))) && maxIter <= 1000
+    if any(~(rate_c > sum(common_rates))) && maxIter <= 50
         maxIter = maxIter  +1;
     end
-    
     if jj >= maxIter
         jj = jj + 1;
         break

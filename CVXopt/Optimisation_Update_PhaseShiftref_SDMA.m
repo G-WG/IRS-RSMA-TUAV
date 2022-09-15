@@ -66,7 +66,7 @@ optStructure_.Rov = zeros(1);
 optStructure_.phaseshifts = zeros(N_R, 1);
 optStructure_.PSgt1 = zeros(1);
 optStructure_.optimalValue = zeros(1);
-optStructure = repmat(optStructure_, maxIter, 1);
+optStructure = repmat(optStructure_, maxIter+1, 1);
 % initial condition for the optimal value
 optStructure(1).optimalValue = 1e6;
 %% Initialise parameters
@@ -159,6 +159,7 @@ while loop
         loop = 0;
     end
     if jj_phaseshift >= maxIter
+        jj_phaseshift = jj_phaseshift + 1;
         break
     end
     jj_phaseshift = jj_phaseshift + 1;

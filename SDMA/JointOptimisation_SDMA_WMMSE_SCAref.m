@@ -1,16 +1,27 @@
-% clear all; 
-% seed_value = 1; N_R = 128; totalJointIters = 20;
-% pp = 0;
-% fileID = 1;
+%%
+% JointOptimisation_SDMA_WMMSE_SCAref.m
+% author: Maximiliano Rivera
+% date: 09-02-2022
+% version: 2.0.0
+%   - channel gain: initialise_params_TUAVv2
+% version: 2.0.1 
+%   - Using: initialise_params_differentScenarios2nd_v4.m 
+
+%%
+
 tau = 1; % 1 for only private precoder
-initialise_params_TUAVv2;
+h_B = 30;
+q_B = [0, 0, h_B]';
+
+% initialise_params_TUAVv2;
+initialise_params_differentScenarios2nd_v4;
 % weights
 u_k = ones(K, 1);
 % Threshold rate
 % Rth = 0*ones(K, 1);
 epsilonSDMA = 1e-6;
-epsilonPS = 1e-4;
-maxIter = 1000;
+epsilonPS = 1e-6;
+maxIter = 1;
 
 SDMAoptCell = {};
 PSoptCell = {};
@@ -26,6 +37,10 @@ fileID = fopen(sprintf('logs/JointOptimisation/log_seed_%d_%s.txt', seed_value, 
 iter = 1;
 common_rates = min(rate_c).*ones(K, 1)/K;
 loop = 1;
+if fileID
+    fprintf(fileID, 'q_TUAV = [%.0f, %.0f, %.0f]\n', q_TUAV(1), q_TUAV(2), q_TUAV(3));
+end
+
 while loop
 
 %% SDMA MMSE
@@ -44,6 +59,9 @@ try
     p_k_IC = SDMAoptStructureWMMSE(SDMAiterationsWMMSE).Pk;
     SDMAoptCell{iter} = {SDMAoptStructureWMMSE(1:SDMAiterationsWMMSE), SDMAloopWMMSE, SDMAiterationsWMMSE, timeElapsedWMMSE};
     SDMAtimeElapsed = SDMAtimeElapsed + timeElapsedWMMSE;
+    if wsr < SDMAoptStructureWMMSE(SDMAiterationsWMMSE).Rov
+        wsr = SDMAoptStructureWMMSE(SDMAiterationsWMMSE).Rov;
+    end
 catch ME
     disp(ME)
     fprintf(fileID, 'Infeasible.\n');
@@ -104,10 +122,14 @@ iter = iter + 1;
 
 %% save workspace and close log
 end
-fprintf('SDMA time Elapsed: %.8f [s], SCA time Elapsed: %.8f [s], total Time: %.8f [s]\n', SDMAtimeElapsed, SCAtimeElapsed, SDMAtimeElapsed+SCAtimeElapsed)
-fprintf(fileID, '\n');
-fprintf(fileID, '##########  END  ##########\n');
-fprintf(fileID, '\n');
-fclose(fileID);
-name_matfile = sprintf('logs/JointOptimisation/log_seed_%d_%s.mat', seed_value, name);
-save(name_matfile)
+if fileID
+    fprintf(fileID, 'SDMA time Elapsed: %.8f [s], SCA time Elapsed: %.8f [s], total Time: %.8f [s]\n', SDMAtimeElapsed, SCAtimeElapsed, SDMAtimeElapsed+SCAtimeElapsed)
+    fprintf(fileID, '\n');
+    fprintf(fileID, '##########  END  ##########\n');
+    fprintf(fileID, '\n');
+    fclose(fileID);
+end
+if matfileHandler
+    name_matfile = sprintf('logs/JointOptimisation/log_seed_%d_%s.mat', seed_value, name);
+    save(name_matfile)
+end

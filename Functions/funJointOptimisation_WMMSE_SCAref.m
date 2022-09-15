@@ -8,8 +8,8 @@ function [ wsr ] = funJointOptimisation_WMMSE_SCAref(seed_value, N_R, K, Rth, to
 % - 2.0: TUAV placement, filename, matfile handler
 %%
 disp('Start: JointOptimisation_WMMSE_SCAref')
-matfileHandler = 0;
-fileIDHandler = 0;
+matfileHandler = 1;
+fileIDHandler = 1;
 JointOptimisation_WMMSE_SCAref;
 disp('finish JointOptimisation_WMMSE_SCAref')
 end

@@ -10,7 +10,7 @@ maximumTetherLength = 100; % m
 linearGrid = -maximumTetherLength:1:maximumTetherLength;
 % linearGrid = [-100:10:-20, -18:0.5:18, 20:10:100];
 [X,Y] = meshgrid(linearGrid);
-altitudeLevels = [10:5:100];
+altitudeLevels = [0];
 
 h_T_U_PL_array = zeros(length(linearGrid), length(linearGrid), K);
 h_T_R_PL_array = zeros(length(linearGrid), length(linearGrid), N_T);
@@ -39,14 +39,14 @@ for iz = 1:length(altitudeLevels)
 %                 h_T_R_PL_array(xIndex, yIndex, :) = sum_square_abs(h_T_R_LOS);
 %                 h_ov_array(xIndex, yIndex, :) = sum_square_abs(h_ov_k);
 %                 h_T_R_PL_array(iz, :) = sum(sum_square_abs(G, 2));
+                if q_TUAV(1) > 5 && abs(q_TUAV(2)) < 10
+                    disp('right')
+                end
                 if linearGrid(xIndex) <= q_RIS(1)
 %                     initialise_params_differentScenarios2nd_v4_NOMA
                     initialise_params_differentScenarios2nd_v4
                     if isRISLOS && isUE2LOS
-%                         fprintf('LOS, qTUAV = [%d, %d, %d]\n', linearGrid(xIndex), linearGrid(yIndex), altitudeTUAV);
-                        if isUE1LOS
-                            disp('ALL LOS')
-                        end
+                        fprintf('LOS, qTUAV = [%d, %d, %d]\n', linearGrid(xIndex), linearGrid(yIndex), altitudeTUAV);
                     end
                     WSR_TUAV_Zposition(xIndex, yIndex, iz) = wsr;
                 end

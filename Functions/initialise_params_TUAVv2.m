@@ -188,3 +188,5 @@ assert(round(trace(P*P')) == Pt, 'power out of bounds')
 
 [rate_c, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c_IC, p_k_IC);
 common_rates = min(rate_c)/K*ones(size(rate_c));
+
+wsr = sum(rate_kp + common_rates);

@@ -1,9 +1,14 @@
 %%
-% seed_value = 150; pp = 1; K = 2; N_R = 128; tau = 0.8; precoderIC = 1; h_B = 30; q_TUAV = [0, 0, h_B]';
+% seed_value = 150; pp = 1; K = 2; N_R = 128; tau = 0.5; precoderIC = 1; h_B = 30; q_TUAV = [-5, 0, h_B+20]';
 rng(seed_value);
 
-%%
-% Based on: A Downlink Coverage Scheme of Tethered UAV (Table 2). 
+%% INITIAL PARAMS
+
+UE_NOMA_common = 2;
+UE_NOMA_private = 1;
+assert(UE_NOMA_common ~= UE_NOMA_private, 'Select different users');
+
+
 % K = 2; % Number of users
 N_T = 4; % Number of transmit antennas
 N_UE = 1; % Number of antennas for each user;
@@ -91,6 +96,8 @@ if pp
     end
     xlim([-100, 100])
     ylim([-100, 100])
+    xlabel('m')
+    ylabel('m')
     legbool=1;setPlotParams;
     axis square
 end
@@ -216,27 +223,16 @@ h_ov_k = (h_T_U_PL' + h_R_U_PL' * Theta * G)';
 
 %% Precoder
 if precoderIC == 1
-    if tau ~= 0 && tau ~= 1
-        p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
-        p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
-    elseif tau == 0
-        p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
-        p_k_IC = zeros(N_T, K);
-    else
-        p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
-        p_c_IC = zeros(N_T, 1);
-    end
+    p_c_IC = AMBF_common_precoder(h_ov_k, Pt, tau);
+    p_k_IC = RZF_private_precoder_matrix(h_ov_k, Pt, K, tau, N_T);
+    p_k_IC(:, UE_NOMA_common) = 0;
+    p_k_IC = p_k_IC/norm(p_k_IC) * sqrt(tau*Pt);
+    
 else
-    if tau ~= 0 && tau ~= 1
-        p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
-        p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
-    elseif tau == 0
-        p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
-        p_k_IC = zeros(N_T, K);
-    else
-        p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
-        p_c_IC = zeros(N_T, 1);
-    end    
+    p_c_IC = SVD_common_precoder(h_ov_k, Pt, tau);
+    p_k_IC = MRT_precoder_private_matrix(h_ov_k, Pt, K, tau);
+    p_k_IC(:, UE_NOMA_common) = 0;
+    p_k_IC = p_k_IC/norm(p_k_IC) * sqrt(tau*Pt);
 end
 P = [p_c_IC, p_k_IC];
 assert(round(trace(P*P')) == Pt, 'power out of bounds')
@@ -246,7 +242,8 @@ assert(round(trace(P*P')) == Pt, 'power out of bounds')
 %%
 
 [rate_c, rate_kp] = compute_rates(h_ov_k, K, varianceNoise, p_c_IC, p_k_IC);
-common_rates = min(rate_c)/K*ones(size(rate_c));
+% common_rates = zeros(size(rate_c)); common_rates(UE_NOMA_common) = rate_c(UE_NOMA_common);
+common_rates = min(rate_c)*ones(K, 1)/K;
 
 wsr = sum(rate_kp + common_rates);
 

@@ -40,13 +40,13 @@ function [opt_val, s, eta_p, beta_p] = CVX_opt_phase_shift_ref(s_IC, ...
 % Version: v1.0 2022/06/21
 
 
-
+%%
 s_old = s_IC;
 eta_p_old  = eta_p_IC;
 beta_p_old = beta_p_IC;
 
 cvx_begin quiet
-    cvx_precision high
+    % cvx_precision high
     % variables
     variable s(N_R) complex
     variable eta_p(K) nonnegative

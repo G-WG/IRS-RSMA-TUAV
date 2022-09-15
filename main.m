@@ -1,8 +1,8 @@
-% h_B = 30;
-% q_B = [0, 0, h_B]';
-% q_TUAV = [0, 0, 0]' + q_B;
+h_B = 30;
+q_B = [0, 0, h_B]';
+q_TUAV = [-5, 0, 20]' + q_B;
 % N_R_list = 2048;
-N_R_list = [128];% N_R_list = [128, 512, 2048];
+N_R_list = [512];% N_R_list = [128, 512, 2048];
 % seed_value = 1;
 seed_value_list = [150];
 K = 2;
@@ -27,7 +27,8 @@ for seed_value = seed_value_list
     %             funJointOptimisation_SCAred_WMMSE(seed_value, N_R, K, Rth, totalJointIters, pp)
 %                 funJointOptimisation_WMMSE_SCAred(seed_value, N_R, K, Rth, totalJointIters, pp, prec)
     %             funJointOptimisation_SCA_WMMSE(seed_value, N_R,    K, Rth, totalJointIters, pp)
-%                 funJointOptimisation_SDMA_WMMSE_SCAref(seed_value, N_R, K, Rth, totalJointIters, pp, prec)
+%                 wsr = funJointOptimisation_SDMA_WMMSE_SCAref(seed_value, N_R, K, Rth, totalJointIters, pp, prec, q_TUAV);
+%                 wsr = funJointOptimisation_WMMSE_SCAref_NOMA(seed_value, N_R, K, Rth, totalJointIters, pp, prec, q_TUAV);
             end
         end
     end

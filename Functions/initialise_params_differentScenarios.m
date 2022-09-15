@@ -1,5 +1,5 @@
 %%
-% seed_value = 5; pp = 1; K = 2; N_R = 128; tau = 0.8; precoderIC = 1;
+seed_value = 150; pp = 1; K = 2; N_R = 128; tau = 0.8; precoderIC = 1;
 rng(seed_value);
 cpt = get(groot,'defaultLineLineWidth');
 if cpt < 1
